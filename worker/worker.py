@@ -136,9 +136,6 @@ emotion_model = emotionModel()
 
 emotions = ('angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral')
 
-global graph
-graph = tf.get_default_graph()
-
 output_indexes = np.array([i for i in range(0, 101)])
 
 
@@ -154,7 +151,6 @@ def processing(filename):
     # File handling end part 1 of 2 #
 
     # OpenCV script Begin #
-    #clear_session() #keras
 
     img = cv2.imread(tmp.name)
     
@@ -188,7 +184,6 @@ def processing(filename):
 
             except:
                 print("detected face has no margin")
-            print("#")
             
             try:
                 #vgg-face expects inputs (224, 224, 3)
@@ -196,33 +191,27 @@ def processing(filename):
                 img_pixels = image.img_to_array(detected_face)
                 img_pixels = np.expand_dims(img_pixels, axis = 0)
                 img_pixels /= 255
-                print("##")
 
-                #find out age and gender
-                #with graph.as_default():
                 age_distributions = age_model.predict(img_pixels)
                 gender_distribution = gender_model.predict(img_pixels)[0]
                 emotion_distribution = emotion_model.predict(emotion_pixels)
-                print("###")
 
                 apparent_age = str(int(np.floor(np.sum(age_distributions * output_indexes, axis = 1))[0]))
                 gender_index = np.argmax(gender_distribution)
                 if gender_index == 0: gender = "F"
                 else: gender = "M"
-                print("####")
 
                 max_index = np.argmax(emotion_distribution[0])
                 emotion = emotions[max_index]
             
                 #background for age gender declaration
-                info_box_color = (33,0,195)#(46,200,255)
+                info_box_color = (33,0,195)
 
                 triangle_cnt = np.array( [(x+int(w/2), y), 
                     (x+int(w/2)-20, y-20), (x+int(w/2)+20, y-20)] )
                 cv2.drawContours(img, [triangle_cnt], 0, info_box_color, -1)
                 cv2.rectangle(img,(x+int(w/2)-50,y-10),(x+int(w/2)+55,y-65),
                     info_box_color,cv2.FILLED)
-                print("#####")
                 
                 if enableGenderIcons:
                     if gender == 'M': gender_icon = male_icon
@@ -231,14 +220,12 @@ def processing(filename):
                     img[y-60:y-60+male_icon.shape[0], x+int(w/2)-50:x+int(w/2)-50+male_icon.shape[1]] = gender_icon
                 else:
                     cv2.putText(img, gender, (x+int(w/2)-42, y - 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-                print("######")
 
                 #labels for age and gender
                 cv2.putText(img, apparent_age, (x+int(w/2), y - 35), 
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                 cv2.putText(img, emotion, (x+(int(w/2)-15), y - 20), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                print("#######")
 
             except Exception as e:
                 print("exception",str(e))
