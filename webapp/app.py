@@ -64,6 +64,8 @@ def upload():
         file.save(tmp.name)
 
         content_type = MimeTypes().guess_type(tmp.name)[0]
+        try:
+            minio.make_bucket('images')
         minio.fput_object('images', filename, tmp.name, 
                             content_type=content_type)
 
