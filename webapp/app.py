@@ -15,14 +15,14 @@ import logging
 
 #from flask_bootstrap import Bootstrap
 
-minio = Minio('minio:9000',
+minio = Minio('localhost:9000',
                 access_key='access_key',
                 secret_key='secret_key',
                 secure=False)
 
 celery = Celery(
-                broker='redis://redis:6379/0', 
-                backend='redis://redis:6379/0'
+                broker='redis://localhost:6379/0', 
+                backend='redis://localhost:6379/0'
                 )
 
 application = Flask(__name__)
